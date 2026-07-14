@@ -5,11 +5,11 @@ import (
 	"temux/internal/models"
 )
 
-type UserRepository struct {
-	DB *sql.DB
-}
+// type UserRepository struct {
+// 	DB *sql.DB
+// }
 
-func (r *UserRepository) CreateUser(user *models.User) error {
+func (r *UserRepository) CreateUser(user *models.User)(int64, error) error {
 
 	query := `
 	INSERT INTO users

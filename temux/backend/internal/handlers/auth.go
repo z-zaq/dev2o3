@@ -14,8 +14,8 @@ import (
 
 type AuthHandler struct {
 	Repo *repository.UserRepository
+	WalletRepo *repository.WalletRepository
 }
-
 func generateReferral() string {
 	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 

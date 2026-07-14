@@ -14,15 +14,14 @@ func InitDB() (*sql.DB, error) {
 	}
 
 	query := `
-	CREATE TABLE IF NOT EXISTS users (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		name TEXT NOT NULL,
-		email TEXT UNIQUE NOT NULL,
-		password TEXT NOT NULL,
-		referral_code TEXT,
-		is_admin BOOLEAN DEFAULT FALSE
-	);
-	`
+	CREATE TABLE IF NOT EXISTS wallets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER UNIQUE NOT NULL,
+    balance REAL DEFAULT 0,
+
+    FOREIGN KEY(user_id)
+    REFERENCES users(id)
+);`
 
 	_, err = db.Exec(query)
 	if err != nil {

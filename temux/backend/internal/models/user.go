@@ -1,5 +1,8 @@
 package models
 
+import (
+	"time"
+)
 type User struct {
 	ID           int    `json:"id"`
 	Name         string `json:"name"`
@@ -7,4 +10,5 @@ type User struct {
 	Password     string `json:"-"`
 	ReferralCode string `json:"referral_code"`
 	IsAdmin      bool   `json:"is_admin"`
+	CreatedAt time.Time `json:"created_at"`
 }
