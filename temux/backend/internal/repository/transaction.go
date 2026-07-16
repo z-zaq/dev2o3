@@ -125,3 +125,47 @@ func (r *TransactionRepository) GetTotalWithdrawals(
 
 	return total, err
 }
+func (r *TransactionRepository) TotalDeposits() (
+	float64,
+	error,
+) {
+
+	var total float64
+
+	query := `
+	SELECT COALESCE(
+		SUM(amount),
+		0
+	)
+	FROM transactions
+	WHERE type='deposit'
+	`
+
+	err := r.DB.QueryRow(
+		query,
+	).Scan(&total)
+
+	return total, err
+}
+func (r *TransactionRepository) TotalWithdrawals() (
+	float64,
+	error,
+) {
+
+	var total float64
+
+	query := `
+	SELECT COALESCE(
+		SUM(amount),
+		0
+	)
+	FROM transactions
+	WHERE type='withdraw'
+	`
+
+	err := r.DB.QueryRow(
+		query,
+	).Scan(&total)
+
+	return total, err
+}

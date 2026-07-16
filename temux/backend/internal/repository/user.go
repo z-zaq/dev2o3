@@ -116,3 +116,57 @@ func (r *UserRepository) GetByReferralCode(
 
 	return user, nil
 }
+func (r *UserRepository) GetByID(
+	id int,
+) (*models.User, error) {
+
+	user := &models.User{}
+
+	query := `
+	SELECT
+	id,
+	name,
+	email,
+	password,
+	referral_code,
+	is_admin
+	FROM users
+	WHERE id = ?
+	`
+
+	err := r.DB.QueryRow(
+		query,
+		id,
+	).Scan(
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&user.Password,
+		&user.ReferralCode,
+		&user.IsAdmin,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+func (r *UserRepository) CountUsers() (
+	int,
+	error,
+) {
+
+	var total int
+
+	query := `
+	SELECT COUNT(*)
+	FROM users
+	`
+
+	err := r.DB.QueryRow(
+		query,
+	).Scan(&total)
+
+	return total, err
+}

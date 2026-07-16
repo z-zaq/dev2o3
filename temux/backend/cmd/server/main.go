@@ -74,6 +74,7 @@ func main() {
 	transactionHandler := &handlers.TransactionHandler{
 		TransactionRepo: transactionRepo,
 		WalletRepo:      walletRepo,
+		ReferralRepo:    referralRepo,
 	}
 	investmentHandler := &handlers.InvestmentHandler{
 		InvestmentRepo: investmentRepo,
@@ -87,6 +88,12 @@ func main() {
 	}
 	referralHandler := &handlers.ReferralHandler{
 		ReferralRepo: referralRepo,
+	}
+	adminHandler := &handlers.AdminHandler{
+		UserRepo:        userRepo,
+		TransactionRepo: transactionRepo,
+		InvestmentRepo:  investmentRepo,
+		ReferralRepo:    referralRepo,
 	}
 
 	//-----------------------------------
@@ -164,6 +171,26 @@ func main() {
 	api.GET(
 		"/referral-stats",
 		referralHandler.Stats,
+	)
+	api.GET(
+		"/referral-rewards",
+		referralHandler.Rewards,
+	)
+
+	api.GET(
+		"/referral-earnings",
+		referralHandler.Earnings,
+	)
+	admin := api.Group("/admin")
+
+	admin.Use(
+		middleware.AdminMiddleware(
+			userRepo,
+		),
+	)
+	admin.GET(
+		"/dashboard",
+		adminHandler.Dashboard,
 	)
 
 	//-----------------------------------

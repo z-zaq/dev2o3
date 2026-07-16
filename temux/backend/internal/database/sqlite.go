@@ -118,6 +118,21 @@ CREATE TABLE IF NOT EXISTS referrals (
 	if err != nil {
 		return nil, err
 	}
+	referralRewardsTable := `
+CREATE TABLE IF NOT EXISTS referral_rewards (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	referrer_id INTEGER NOT NULL,
+	referred_id INTEGER NOT NULL,
+	deposit_amount REAL NOT NULL,
+	commission REAL NOT NULL,
+	created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+`
+
+	_, err = db.Exec(referralRewardsTable)
+	if err != nil {
+		return nil, err
+	}
 
 	return db, nil
 }

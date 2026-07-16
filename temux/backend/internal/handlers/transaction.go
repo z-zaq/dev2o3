@@ -13,6 +13,7 @@ import (
 type TransactionHandler struct {
 	TransactionRepo *repository.TransactionRepository
 	WalletRepo      *repository.WalletRepository
+	ReferralRepo    *repository.ReferralRepository
 }
 
 func (h *TransactionHandler) Deposit(
@@ -61,6 +62,35 @@ func (h *TransactionHandler) Deposit(
 		userID,
 		req.Amount,
 	)
+	//-----------------------------------
+	// Referral Commission
+	//-----------------------------------
+
+	referrerID, err :=
+		h.ReferralRepo.GetReferrerByReferredID(
+			userID,
+		)
+
+	if err == nil {
+
+		commission := req.Amount * 0.05
+
+		_ = h.WalletRepo.AddBalance(
+			referrerID,
+			commission,
+		)
+
+		reward := &models.ReferralReward{
+			ReferrerID:    referrerID,
+			ReferredID:    userID,
+			DepositAmount: req.Amount,
+			Commission:    commission,
+		}
+
+		_ = h.ReferralRepo.CreateReward(
+			reward,
+		)
+	}
 
 	if err != nil {
 		c.JSON(

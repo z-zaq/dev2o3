@@ -234,3 +234,43 @@ func (r *InvestmentRepository) TotalProfit(
 
 	return total, err
 }
+func (r *InvestmentRepository) TotalInvestments() (
+	float64,
+	error,
+) {
+
+	var total float64
+
+	query := `
+	SELECT COALESCE(
+		SUM(amount),
+		0
+	)
+	FROM investments
+	`
+
+	err := r.DB.QueryRow(
+		query,
+	).Scan(&total)
+
+	return total, err
+}
+func (r *InvestmentRepository) TotalActiveInvestments() (
+	int,
+	error,
+) {
+
+	var count int
+
+	query := `
+	SELECT COUNT(*)
+	FROM investments
+	WHERE status='active'
+	`
+
+	err := r.DB.QueryRow(
+		query,
+	).Scan(&count)
+
+	return count, err
+}
