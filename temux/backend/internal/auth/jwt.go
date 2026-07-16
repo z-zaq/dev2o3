@@ -1,12 +1,39 @@
 package auth
 
 import (
+	"errors"
+	"time"
+
 	"temux/internal/config"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func ParseToken(tokenString string) (jwt.MapClaims, error) {
+func GenerateToken(
+	userID int,
+) (string, error) {
+
+	claims := jwt.MapClaims{
+		"user_id": userID,
+		"exp": time.Now().
+			Add(24 * time.Hour).
+			Unix(),
+	}
+
+	token := jwt.NewWithClaims(
+		jwt.SigningMethodHS256,
+		claims,
+	)
+
+	return token.SignedString(
+		[]byte(config.JWTSecret()),
+	)
+
+}
+
+func ParseToken(
+	tokenString string,
+) (jwt.MapClaims, error) {
 
 	token, err := jwt.Parse(
 		tokenString,
@@ -19,7 +46,16 @@ func ParseToken(tokenString string) (jwt.MapClaims, error) {
 		return nil, err
 	}
 
-	claims := token.Claims.(jwt.MapClaims)
+	if !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+
+	if !ok {
+		return nil, errors.New("invalid claims")
+	}
 
 	return claims, nil
+
 }

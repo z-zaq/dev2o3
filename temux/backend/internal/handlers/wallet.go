@@ -12,6 +12,7 @@ import (
 type WalletHandler struct {
 	WalletRepo *repository.WalletRepository
 }
+
 func (h *WalletHandler) GetWallet(
 	c *gin.Context,
 ) {

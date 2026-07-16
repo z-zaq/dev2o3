@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strings"
 	"temux/internal/auth"
+
 	"github.com/gin-gonic/gin"
 )
-
 
 func AuthMiddleware() gin.HandlerFunc {
 
@@ -17,7 +17,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		if header == "" {
 			c.AbortWithStatusJSON(
 				http.StatusUnauthorized,
-				gin.H{"error":"missing token"},
+				gin.H{"error": "missing token"},
 			)
 			return
 		}
@@ -27,14 +27,13 @@ func AuthMiddleware() gin.HandlerFunc {
 			"Bearer ",
 		)
 
-		claims, err := auth.ParseToken(
-			tokenString,
-		)
+		claims, err := auth.ParseToken(tokenString)
 
 		if err != nil {
+			// log.Println("ParseToken error:", err)
 			c.AbortWithStatusJSON(
 				http.StatusUnauthorized,
-				gin.H{"error":"invalid token"},
+				gin.H{"error": "invalid token"},
 			)
 			return
 		}

@@ -8,14 +8,18 @@ import (
 type WalletRepository struct {
 	DB *sql.DB
 }
+
 func (r *WalletRepository) CreateWallet(userID int) error {
 
 	query := `
-	INSERT INTO wallets(user_id,balance)
-	VALUES(?,0)
+	INSERT INTO wallets(user_id, balance)
+	VALUES(?, 0)
 	`
 
-	_, err := r.DB.Exec(query, userID)
+	_, err := r.DB.Exec(
+		query,
+		userID,
+	)
 
 	return err
 }
