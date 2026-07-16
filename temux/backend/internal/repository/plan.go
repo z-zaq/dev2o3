@@ -72,3 +72,39 @@ func (r *PlanRepository) SeedPlans() error {
 
 	return err
 }
+func (r *PlanRepository) GetByID(
+	id int,
+) (*models.Plan, error) {
+
+	plan := &models.Plan{}
+
+	query := `
+	SELECT
+		id,
+		name,
+		min_amount,
+		max_amount,
+		daily_rate,
+		duration_day
+	FROM plans
+	WHERE id = ?
+	`
+
+	err := r.DB.QueryRow(
+		query,
+		id,
+	).Scan(
+		&plan.ID,
+		&plan.Name,
+		&plan.MinAmount,
+		&plan.MaxAmount,
+		&plan.DailyRate,
+		&plan.DurationDay,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return plan, nil
+}

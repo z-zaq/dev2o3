@@ -51,6 +51,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	investmentRepo := &repository.InvestmentRepository{
+		DB: db,
+	}
+
 	//-----------------------------------
 	// Handlers
 	//-----------------------------------
@@ -66,6 +70,11 @@ func main() {
 	transactionHandler := &handlers.TransactionHandler{
 		TransactionRepo: transactionRepo,
 		WalletRepo:      walletRepo,
+	}
+	investmentHandler := &handlers.InvestmentHandler{
+		InvestmentRepo: investmentRepo,
+		PlanRepo:       planRepo,
+		WalletRepo:     walletRepo,
 	}
 
 	//-----------------------------------
@@ -122,6 +131,14 @@ func main() {
 	api.POST(
 		"/withdraw",
 		transactionHandler.Withdraw,
+	)
+	api.POST(
+		"/invest",
+		investmentHandler.Invest,
+	)
+	api.GET(
+		"/investments",
+		investmentHandler.History,
 	)
 
 	//-----------------------------------

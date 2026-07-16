@@ -59,10 +59,7 @@ func InitDB() (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	return db, nil
-}
-plansTable := `
+	plansTable := `
 CREATE TABLE IF NOT EXISTS plans (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	name TEXT NOT NULL,
@@ -73,17 +70,19 @@ CREATE TABLE IF NOT EXISTS plans (
 );
 `
 
-_, err = db.Exec(plansTable)
-if err != nil {
-	return nil, err
-}
-investmentsTable := `
+	_, err = db.Exec(plansTable)
+	if err != nil {
+		return nil, err
+	}
+	investmentsTable := `
 CREATE TABLE IF NOT EXISTS investments (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	user_id INTEGER NOT NULL,
 	plan_id INTEGER NOT NULL,
 	amount REAL NOT NULL,
 	daily_rate REAL NOT NULL,
+	profit_earned REAL DEFAULT 0,
+	claimed_profit REAL DEFAULT 0,
 	start_date DATETIME NOT NULL,
 	end_date DATETIME NOT NULL,
 	status TEXT DEFAULT 'active',
@@ -96,7 +95,10 @@ CREATE TABLE IF NOT EXISTS investments (
 );
 `
 
-_, err = db.Exec(investmentsTable)
-if err != nil {
-	return nil, err
+	_, err = db.Exec(investmentsTable)
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
 }
