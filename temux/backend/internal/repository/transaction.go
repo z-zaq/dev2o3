@@ -85,3 +85,43 @@ func (r *TransactionRepository) GetByUserID(
 
 	return transactions, nil
 }
+func (r *TransactionRepository) GetTotalDeposits(
+	userID int,
+) (float64, error) {
+
+	var total float64
+
+	query := `
+	SELECT COALESCE(SUM(amount),0)
+	FROM transactions
+	WHERE user_id = ?
+	AND type = 'deposit'
+	`
+
+	err := r.DB.QueryRow(
+		query,
+		userID,
+	).Scan(&total)
+
+	return total, err
+}
+func (r *TransactionRepository) GetTotalWithdrawals(
+	userID int,
+) (float64, error) {
+
+	var total float64
+
+	query := `
+	SELECT COALESCE(SUM(amount),0)
+	FROM transactions
+	WHERE user_id = ?
+	AND type = 'withdraw'
+	`
+
+	err := r.DB.QueryRow(
+		query,
+		userID,
+	).Scan(&total)
+
+	return total, err
+}

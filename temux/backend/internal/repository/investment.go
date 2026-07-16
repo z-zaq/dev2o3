@@ -176,10 +176,61 @@ func (r *InvestmentRepository) GetByID(
 
 	return inv, nil
 }
+func (r *InvestmentRepository) CountActive(
+	userID int,
+) (int, error) {
 
-// func (h *InvestmentHandler) ClaimProfit(
-// 	c *gin.Context,
-// ) {
+	var count int
 
-// 	// We'll implement this next
-// }
+	query := `
+	SELECT COUNT(*)
+	FROM investments
+	WHERE user_id = ?
+	AND status = 'active'
+	`
+
+	err := r.DB.QueryRow(
+		query,
+		userID,
+	).Scan(&count)
+
+	return count, err
+}
+func (r *InvestmentRepository) TotalInvested(
+	userID int,
+) (float64, error) {
+
+	var total float64
+
+	query := `
+	SELECT COALESCE(SUM(amount),0)
+	FROM investments
+	WHERE user_id = ?
+	`
+
+	err := r.DB.QueryRow(
+		query,
+		userID,
+	).Scan(&total)
+
+	return total, err
+}
+func (r *InvestmentRepository) TotalProfit(
+	userID int,
+) (float64, error) {
+
+	var total float64
+
+	query := `
+	SELECT COALESCE(SUM(profit_earned),0)
+	FROM investments
+	WHERE user_id = ?
+	`
+
+	err := r.DB.QueryRow(
+		query,
+		userID,
+	).Scan(&total)
+
+	return total, err
+}

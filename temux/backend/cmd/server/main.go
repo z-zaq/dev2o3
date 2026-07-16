@@ -54,14 +54,18 @@ func main() {
 	investmentRepo := &repository.InvestmentRepository{
 		DB: db,
 	}
+	referralRepo := &repository.ReferralRepository{
+		DB: db,
+	}
 
 	//-----------------------------------
 	// Handlers
 	//-----------------------------------
 
 	authHandler := &handlers.AuthHandler{
-		Repo:       userRepo,
-		WalletRepo: walletRepo,
+		Repo:         userRepo,
+		WalletRepo:   walletRepo,
+		ReferralRepo: referralRepo,
 	}
 
 	walletHandler := &handlers.WalletHandler{
@@ -75,6 +79,14 @@ func main() {
 		InvestmentRepo: investmentRepo,
 		PlanRepo:       planRepo,
 		WalletRepo:     walletRepo,
+	}
+	dashboardHandler := &handlers.DashboardHandler{
+		WalletRepo:      walletRepo,
+		TransactionRepo: transactionRepo,
+		InvestmentRepo:  investmentRepo,
+	}
+	referralHandler := &handlers.ReferralHandler{
+		ReferralRepo: referralRepo,
 	}
 
 	//-----------------------------------
@@ -139,6 +151,19 @@ func main() {
 	api.GET(
 		"/investments",
 		investmentHandler.History,
+	)
+	api.GET(
+		"/dashboard",
+		dashboardHandler.GetDashboard,
+	)
+	api.GET(
+		"/referrals",
+		referralHandler.MyReferrals,
+	)
+
+	api.GET(
+		"/referral-stats",
+		referralHandler.Stats,
 	)
 
 	//-----------------------------------

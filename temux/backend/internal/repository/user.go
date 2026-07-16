@@ -80,3 +80,39 @@ WHERE email = ?
 	return user, nil
 
 }
+func (r *UserRepository) GetByReferralCode(
+	code string,
+) (*models.User, error) {
+
+	user := &models.User{}
+
+	query := `
+	SELECT
+	id,
+	name,
+	email,
+	password,
+	referral_code,
+	is_admin
+	FROM users
+	WHERE referral_code = ?
+	`
+
+	err := r.DB.QueryRow(
+		query,
+		code,
+	).Scan(
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&user.Password,
+		&user.ReferralCode,
+		&user.IsAdmin,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}

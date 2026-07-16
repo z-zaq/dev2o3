@@ -13,8 +13,9 @@ import (
 )
 
 type AuthHandler struct {
-	Repo       *repository.UserRepository
-	WalletRepo *repository.WalletRepository
+	Repo         *repository.UserRepository
+	WalletRepo   *repository.WalletRepository
+	ReferralRepo *repository.ReferralRepository
 }
 
 func generateReferral() string {
@@ -34,21 +35,45 @@ func generateReferral() string {
 func (h *AuthHandler) Register(c *gin.Context) {
 
 	var req struct {
-		Name     string `json:"name"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		Name         string `json:"name"`
+		Email        string `json:"email"`
+		Password     string `json:"password"`
+		ReferralCode string `json:"referral_code"`
 	}
 
+	//-----------------------------------
+	// Parse Request
+	//-----------------------------------
+
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest,
-			gin.H{"error": err.Error()})
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{"error": err.Error()},
+		)
 		return
 	}
 
-	hash, _ := bcrypt.GenerateFromPassword(
+	//-----------------------------------
+	// Hash Password
+	//-----------------------------------
+
+	hash, err := bcrypt.GenerateFromPassword(
 		[]byte(req.Password),
 		bcrypt.DefaultCost,
 	)
+
+	if err != nil {
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{"error": "failed to hash password"},
+		)
+		return
+	}
+
+	//-----------------------------------
+	// Create User Object
+	//-----------------------------------
+
 	user := &models.User{
 		Name:         req.Name,
 		Email:        req.Email,
@@ -56,62 +81,78 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		ReferralCode: generateReferral(),
 	}
 
+	//-----------------------------------
+	// Create User
+	//-----------------------------------
+
 	userID, err := h.Repo.CreateUser(user)
 
 	if err != nil {
 		c.JSON(
 			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
+			gin.H{"error": err.Error()},
 		)
 		return
 	}
+
+	//-----------------------------------
+	// Create Wallet
+	//-----------------------------------
 
 	err = h.WalletRepo.CreateWallet(
 		int(userID),
 	)
 
 	if err != nil {
-
 		c.JSON(
 			http.StatusInternalServerError,
-			gin.H{
-				"error": "failed to create wallet",
-			},
+			gin.H{"error": "wallet creation failed"},
 		)
-
 		return
 	}
+
+	//-----------------------------------
+	// Process Referral
+	//-----------------------------------
+
+	if req.ReferralCode != "" {
+
+		referrer, err := h.Repo.GetByReferralCode(
+			req.ReferralCode,
+		)
+
+		if err == nil {
+
+			err = h.ReferralRepo.CreateReferral(
+				referrer.ID,
+				int(userID),
+			)
+
+			if err != nil {
+				c.JSON(
+					http.StatusInternalServerError,
+					gin.H{
+						"error": "referral creation failed",
+					},
+				)
+				return
+			}
+		}
+	}
+
+	//-----------------------------------
+	// Success
+	//-----------------------------------
 
 	c.JSON(
 		http.StatusCreated,
 		gin.H{
-			"message": "registered",
+			"message":       "registration successful",
+			"user_id":       userID,
+			"referral_code": user.ReferralCode,
 		},
 	)
 }
-
-// 	user := &models.User{
-// 		Name:         req.Name,
-// 		Email:        req.Email,
-// 		Password:     string(hash),
-// 		ReferralCode: generateReferral(),
-// 	}
-
-// 	userID, err := h.Repo.CreateUser(user)
-// 	if err != nil {
-// 	c.JSON(
-// 		http.StatusBadRequest,
-// 		gin.H{"error": err.Error()},
-// 	)
-// 	return
-// }
-
-// 	c.JSON(http.StatusCreated,
-// 		gin.H{"message": "registered"})
-// }
-
 func (h *AuthHandler) Login(c *gin.Context) {
 
 	var req struct {
