@@ -40,7 +40,17 @@ func main() {
 	walletRepo := &repository.WalletRepository{
 		DB: db,
 	}
+	transactionRepo := &repository.TransactionRepository{
+		DB: db,
+	}
+	planRepo := &repository.PlanRepository{
+		DB: db,
+	}
+	err = planRepo.SeedPlans()
 
+	if err != nil {
+		log.Fatal(err)
+	}
 	//-----------------------------------
 	// Handlers
 	//-----------------------------------
@@ -52,6 +62,10 @@ func main() {
 
 	walletHandler := &handlers.WalletHandler{
 		WalletRepo: walletRepo,
+	}
+	transactionHandler := &handlers.TransactionHandler{
+		TransactionRepo: transactionRepo,
+		WalletRepo:      walletRepo,
 	}
 
 	//-----------------------------------
@@ -96,6 +110,18 @@ func main() {
 	api.GET(
 		"/wallet",
 		walletHandler.GetWallet,
+	)
+	api.POST(
+		"/deposit",
+		transactionHandler.Deposit,
+	)
+	api.GET(
+		"/transactions",
+		transactionHandler.History,
+	)
+	api.POST(
+		"/withdraw",
+		transactionHandler.Withdraw,
 	)
 
 	//-----------------------------------
