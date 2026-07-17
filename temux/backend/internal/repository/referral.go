@@ -228,3 +228,43 @@ func (r *ReferralRepository) TotalReferrals() (
 
 	return count, err
 }
+func (r *ReferralRepository) CountByReferrerID(
+	referrerID int,
+) (int, error) {
+
+	var count int
+
+	query := `
+	SELECT COUNT(*)
+	FROM referrals
+	WHERE referrer_id = ?
+	`
+
+	err := r.DB.QueryRow(
+		query,
+		referrerID,
+	).Scan(&count)
+
+	return count, err
+}
+
+// func (r *InvestmentRepository) CountActiveByUser(
+// 	userID int,
+// ) (int, error) {
+
+// 	var count int
+
+// 	query := `
+// 	SELECT COUNT(*)
+// 	FROM investments
+// 	WHERE user_id = ?
+// 	AND status = 'active'
+// 	`
+
+// 	err := r.DB.QueryRow(
+// 		query,
+// 		userID,
+// 	).Scan(&count)
+
+// 	return count, err
+// }

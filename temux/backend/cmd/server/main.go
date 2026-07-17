@@ -57,6 +57,9 @@ func main() {
 	referralRepo := &repository.ReferralRepository{
 		DB: db,
 	}
+	withdrawalRepo := &repository.WithdrawalRepository{
+		DB: db,
+	}
 
 	//-----------------------------------
 	// Handlers
@@ -75,6 +78,7 @@ func main() {
 		TransactionRepo: transactionRepo,
 		WalletRepo:      walletRepo,
 		ReferralRepo:    referralRepo,
+		WithdrawalRepo:  withdrawalRepo,
 	}
 	investmentHandler := &handlers.InvestmentHandler{
 		InvestmentRepo: investmentRepo,
@@ -91,6 +95,7 @@ func main() {
 	}
 	adminHandler := &handlers.AdminHandler{
 		UserRepo:        userRepo,
+		WalletRepo:      walletRepo,
 		TransactionRepo: transactionRepo,
 		InvestmentRepo:  investmentRepo,
 		ReferralRepo:    referralRepo,
@@ -191,6 +196,22 @@ func main() {
 	admin.GET(
 		"/dashboard",
 		adminHandler.Dashboard,
+	)
+	admin.GET(
+		"/users",
+		adminHandler.Users,
+	)
+	admin.GET(
+		"/dashboard",
+		adminHandler.Dashboard,
+	)
+	admin.GET(
+		"/users/:id",
+		adminHandler.UserDetails,
+	)
+	admin.GET(
+		"/transactions",
+		adminHandler.Transactions,
 	)
 
 	//-----------------------------------

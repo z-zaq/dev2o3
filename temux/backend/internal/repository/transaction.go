@@ -169,3 +169,53 @@ func (r *TransactionRepository) TotalWithdrawals() (
 
 	return total, err
 }
+func (r *TransactionRepository) GetAllTransactions() (
+	[]models.Transaction,
+	error,
+) {
+
+	query := `
+	SELECT
+	id,
+	user_id,
+	type,
+	amount,
+	created_at
+	FROM transactions
+	ORDER BY created_at DESC
+	`
+
+	rows, err := r.DB.Query(query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var transactions []models.Transaction
+
+	for rows.Next() {
+
+		var tx models.Transaction
+
+		err := rows.Scan(
+			&tx.ID,
+			&tx.UserID,
+			&tx.Type,
+			&tx.Amount,
+			&tx.CreatedAt,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		transactions = append(
+			transactions,
+			tx,
+		)
+	}
+
+	return transactions, nil
+}

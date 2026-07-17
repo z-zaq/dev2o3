@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"strconv"
 	"temux/internal/repository"
 
 	"github.com/gin-gonic/gin"
@@ -8,6 +9,7 @@ import (
 
 type AdminHandler struct {
 	UserRepo        *repository.UserRepository
+	WalletRepo      *repository.WalletRepository
 	TransactionRepo *repository.TransactionRepository
 	InvestmentRepo  *repository.InvestmentRepository
 	ReferralRepo    *repository.ReferralRepository
@@ -45,5 +47,125 @@ func (h *AdminHandler) Dashboard(
 			"active_investments": activeInvestments,
 			"total_referrals":    totalReferrals,
 		},
+	)
+}
+func (h *AdminHandler) Users(
+	c *gin.Context,
+) {
+
+	users, err :=
+		h.UserRepo.GetAllUsers()
+
+	if err != nil {
+
+		c.JSON(
+			500,
+			gin.H{
+				"error": err.Error(),
+			},
+		)
+
+		return
+	}
+
+	c.JSON(
+		200,
+		users,
+	)
+}
+func (h *AdminHandler) UserDetails(
+	c *gin.Context,
+) {
+
+	idParam := c.Param("id")
+
+	userID, err := strconv.Atoi(idParam)
+
+	if err != nil {
+
+		c.JSON(
+			400,
+			gin.H{
+				"error": "invalid user id",
+			},
+		)
+
+		return
+	}
+
+	user, err :=
+		h.UserRepo.GetByID(userID)
+
+	if err != nil {
+
+		c.JSON(
+			404,
+			gin.H{
+				"error": "user not found",
+			},
+		)
+
+		return
+	}
+
+	wallet, _ :=
+		h.WalletRepo.GetWalletByUserID(
+			userID,
+		)
+
+	totalDeposits, _ :=
+		h.TransactionRepo.GetTotalDeposits(
+			userID,
+		)
+
+	totalWithdrawals, _ :=
+		h.TransactionRepo.GetTotalWithdrawals(
+			userID,
+		)
+
+	activeInvestments, _ :=
+		h.InvestmentRepo.CountActiveByUser(
+			userID,
+		)
+
+	referrals, _ :=
+		h.ReferralRepo.CountReferrals(
+			userID,
+		)
+
+	c.JSON(
+		200,
+		gin.H{
+			"user":               user,
+			"wallet":             wallet,
+			"total_deposits":     totalDeposits,
+			"total_withdrawals":  totalWithdrawals,
+			"active_investments": activeInvestments,
+			"referral_count":     referrals,
+		},
+	)
+}
+func (h *AdminHandler) Transactions(
+	c *gin.Context,
+) {
+
+	transactions, err :=
+		h.TransactionRepo.GetAllTransactions()
+
+	if err != nil {
+
+		c.JSON(
+			500,
+			gin.H{
+				"error": err.Error(),
+			},
+		)
+
+		return
+	}
+
+	c.JSON(
+		200,
+		transactions,
 	)
 }

@@ -133,6 +133,23 @@ CREATE TABLE IF NOT EXISTS referral_rewards (
 	if err != nil {
 		return nil, err
 	}
+	withdrawalsTable := `
+CREATE TABLE IF NOT EXISTS withdrawals (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	user_id INTEGER NOT NULL,
+	amount REAL NOT NULL,
+	status TEXT DEFAULT 'pending',
+	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+	FOREIGN KEY(user_id)
+	REFERENCES users(id)
+);
+`
+
+	_, err = db.Exec(withdrawalsTable)
+	if err != nil {
+		return nil, err
+	}
 
 	return db, nil
 }

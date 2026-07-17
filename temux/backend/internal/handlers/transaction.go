@@ -14,6 +14,7 @@ type TransactionHandler struct {
 	TransactionRepo *repository.TransactionRepository
 	WalletRepo      *repository.WalletRepository
 	ReferralRepo    *repository.ReferralRepository
+	WithdrawalRepo  *repository.WithdrawalRepository
 }
 
 func (h *TransactionHandler) Deposit(
@@ -177,14 +178,13 @@ func (h *TransactionHandler) Withdraw(
 		)
 		return
 	}
-
-	tx := &models.Transaction{
+	request := &models.Withdrawal{
 		UserID: userID,
-		Type:   "withdraw",
 		Amount: req.Amount,
+		Status: "pending",
 	}
 
-	err = h.TransactionRepo.CreateTransaction(tx)
+	err = h.WithdrawalRepo.Create(request)
 
 	if err != nil {
 		c.JSON(
@@ -193,24 +193,10 @@ func (h *TransactionHandler) Withdraw(
 		)
 		return
 	}
-
-	err = h.WalletRepo.DeductBalance(
-		userID,
-		req.Amount,
-	)
-
-	if err != nil {
-		c.JSON(
-			http.StatusInternalServerError,
-			gin.H{"error": err.Error()},
-		)
-		return
-	}
-
 	c.JSON(
 		http.StatusOK,
 		gin.H{
-			"message": "withdrawal successful",
+			"message": "withdrawal request submitted",
 		},
 	)
 }
