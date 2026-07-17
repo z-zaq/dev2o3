@@ -99,6 +99,7 @@ func main() {
 		TransactionRepo: transactionRepo,
 		InvestmentRepo:  investmentRepo,
 		ReferralRepo:    referralRepo,
+		WithdrawalRepo:  withdrawalRepo,
 	}
 
 	//-----------------------------------
@@ -212,6 +213,19 @@ func main() {
 	admin.GET(
 		"/transactions",
 		adminHandler.Transactions,
+	)
+	admin.GET(
+		"/withdrawals",
+		adminHandler.PendingWithdrawals,
+	)
+	admin.POST(
+		"/withdrawals/:id/approve",
+		adminHandler.ApproveWithdrawal,
+	)
+
+	admin.POST(
+		"/withdrawals/:id/reject",
+		adminHandler.RejectWithdrawal,
 	)
 
 	//-----------------------------------

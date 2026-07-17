@@ -98,3 +98,37 @@ func (r *WithdrawalRepository) UpdateStatus(
 
 	return err
 }
+func (r *WithdrawalRepository) GetByID(
+	id int,
+) (*models.Withdrawal, error) {
+
+	withdrawal := &models.Withdrawal{}
+
+	query := `
+	SELECT
+		id,
+		user_id,
+		amount,
+		status,
+		created_at
+	FROM withdrawals
+	WHERE id = ?
+	`
+
+	err := r.DB.QueryRow(
+		query,
+		id,
+	).Scan(
+		&withdrawal.ID,
+		&withdrawal.UserID,
+		&withdrawal.Amount,
+		&withdrawal.Status,
+		&withdrawal.CreatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return withdrawal, nil
+}

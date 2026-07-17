@@ -13,6 +13,7 @@ type AdminHandler struct {
 	TransactionRepo *repository.TransactionRepository
 	InvestmentRepo  *repository.InvestmentRepository
 	ReferralRepo    *repository.ReferralRepository
+	WithdrawalRepo  *repository.WithdrawalRepository
 }
 
 func (h *AdminHandler) Dashboard(
@@ -167,5 +168,51 @@ func (h *AdminHandler) Transactions(
 	c.JSON(
 		200,
 		transactions,
+	)
+}
+func (h *AdminHandler) PendingWithdrawals(
+	c *gin.Context,
+) {
+
+	withdrawals, err :=
+		h.WithdrawalRepo.GetPending()
+
+	if err != nil {
+
+		c.JSON(
+			500,
+			gin.H{
+				"error": err.Error(),
+			},
+		)
+
+		return
+	}
+
+	c.JSON(
+		200,
+		withdrawals,
+	)
+}
+func (h *AdminHandler) ApproveWithdrawal(
+	c *gin.Context,
+) {
+
+	c.JSON(
+		200,
+		gin.H{
+			"message": "approve withdrawal not implemented yet",
+		},
+	)
+}
+func (h *AdminHandler) RejectWithdrawal(
+	c *gin.Context,
+) {
+
+	c.JSON(
+		200,
+		gin.H{
+			"message": "withdrawal rejected",
+		},
 	)
 }
