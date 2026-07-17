@@ -2,12 +2,14 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"temux/internal/config"
 	"temux/internal/database"
 	"temux/internal/handlers"
 	"temux/internal/middleware"
 	"temux/internal/repository"
+	"temux/internal/services"
 
 	"github.com/gin-gonic/gin"
 )
@@ -60,6 +62,19 @@ func main() {
 	withdrawalRepo := &repository.WithdrawalRepository{
 		DB: db,
 	}
+	go func() {
+
+		for {
+
+			services.ProcessProfits(
+				investmentRepo,
+			)
+
+			time.Sleep(
+				time.Minute,
+			)
+		}
+	}()
 
 	//-----------------------------------
 	// Handlers
@@ -81,9 +96,10 @@ func main() {
 		WithdrawalRepo:  withdrawalRepo,
 	}
 	investmentHandler := &handlers.InvestmentHandler{
-		InvestmentRepo: investmentRepo,
-		PlanRepo:       planRepo,
-		WalletRepo:     walletRepo,
+		InvestmentRepo:  investmentRepo,
+		PlanRepo:        planRepo,
+		WalletRepo:      walletRepo,
+		TransactionRepo: transactionRepo,
 	}
 	dashboardHandler := &handlers.DashboardHandler{
 		WalletRepo:      walletRepo,

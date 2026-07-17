@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"strconv"
+	"temux/internal/models"
 	"temux/internal/repository"
 
 	"github.com/gin-gonic/gin"
@@ -198,13 +199,141 @@ func (h *AdminHandler) ApproveWithdrawal(
 	c *gin.Context,
 ) {
 
+	idParam := c.Param("id")
+
+	withdrawalID, err := strconv.Atoi(
+		idParam,
+	)
+
+	if err != nil {
+		c.JSON(
+			400,
+			gin.H{
+				"error": "invalid withdrawal id",
+			},
+		)
+		return
+	}
+
+	withdrawal, err :=
+		h.WithdrawalRepo.GetByID(
+			withdrawalID,
+		)
+
+	if err != nil {
+		c.JSON(
+			404,
+			gin.H{
+				"error": "withdrawal not found",
+			},
+		)
+		return
+	}
+
+	if withdrawal.Status != "pending" {
+		c.JSON(
+			400,
+			gin.H{
+				"error": "withdrawal already processed",
+			},
+		)
+		return
+	}
+
+	wallet, err :=
+		h.WalletRepo.GetWalletByUserID(
+			withdrawal.UserID,
+		)
+
+	if err != nil {
+		c.JSON(
+			500,
+			gin.H{
+				"error": err.Error(),
+			},
+		)
+		return
+	}
+
+	if wallet.Balance < withdrawal.Amount {
+		c.JSON(
+			400,
+			gin.H{
+				"error": "insufficient wallet balance",
+			},
+		)
+		return
+	}
+
+	err = h.WalletRepo.DeductBalance(
+		withdrawal.UserID,
+		withdrawal.Amount,
+	)
+
+	if err != nil {
+		c.JSON(
+			500,
+			gin.H{
+				"error": err.Error(),
+			},
+		)
+		return
+	}
+
+	tx := &models.Transaction{
+		UserID: withdrawal.UserID,
+		Type:   "withdraw",
+		Amount: withdrawal.Amount,
+	}
+
+	err = h.TransactionRepo.CreateTransaction(
+		tx,
+	)
+
+	if err != nil {
+		c.JSON(
+			500,
+			gin.H{
+				"error": err.Error(),
+			},
+		)
+		return
+	}
+
+	err = h.WithdrawalRepo.UpdateStatus(
+		withdrawal.ID,
+		"approved",
+	)
+
+	if err != nil {
+		c.JSON(
+			500,
+			gin.H{
+				"error": err.Error(),
+			},
+		)
+		return
+	}
+
 	c.JSON(
 		200,
 		gin.H{
-			"message": "approve withdrawal not implemented yet",
+			"message": "withdrawal approved",
 		},
 	)
 }
+
+// func (h *AdminHandler) ApproveWithdrawal(
+// 	c *gin.Context,
+// ) {
+
+//		c.JSON(
+//			200,
+//			gin.H{
+//				"message": "approve withdrawal not implemented yet",
+//			},
+//		)
+//	}
 func (h *AdminHandler) RejectWithdrawal(
 	c *gin.Context,
 ) {

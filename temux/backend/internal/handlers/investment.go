@@ -11,9 +11,10 @@ import (
 )
 
 type InvestmentHandler struct {
-	InvestmentRepo *repository.InvestmentRepository
-	PlanRepo       *repository.PlanRepository
-	WalletRepo     *repository.WalletRepository
+	InvestmentRepo  *repository.InvestmentRepository
+	PlanRepo        *repository.PlanRepository
+	WalletRepo      *repository.WalletRepository
+	TransactionRepo *repository.TransactionRepository
 }
 
 func (h *InvestmentHandler) Invest(

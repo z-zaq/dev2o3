@@ -294,3 +294,61 @@ func (r *InvestmentRepository) CountActiveByUser(
 
 	return count, err
 }
+func (r *InvestmentRepository) GetActiveInvestments() (
+	[]models.Investment,
+	error,
+) {
+
+	rows, err := r.DB.Query(`
+	SELECT
+		id,
+		user_id,
+		plan_id,
+		amount,
+		daily_rate,
+		profit_earned,
+		claimed_profit,
+		start_date,
+		end_date,
+		status
+	FROM investments
+	WHERE status='active'
+	`)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var investments []models.Investment
+
+	for rows.Next() {
+
+		var inv models.Investment
+
+		err := rows.Scan(
+			&inv.ID,
+			&inv.UserID,
+			&inv.PlanID,
+			&inv.Amount,
+			&inv.DailyRate,
+			&inv.ProfitEarned,
+			&inv.ClaimedProfit,
+			&inv.StartDate,
+			&inv.EndDate,
+			&inv.Status,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		investments = append(
+			investments,
+			inv,
+		)
+	}
+
+	return investments, nil
+}
