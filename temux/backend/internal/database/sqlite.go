@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -151,5 +152,27 @@ CREATE TABLE IF NOT EXISTS withdrawals (
 		return nil, err
 	}
 
-	return db, nil
+paymentsTable := `
+CREATE TABLE IF NOT EXISTS payments (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	user_id INTEGER NOT NULL,
+	reference TEXT UNIQUE NOT NULL,
+	amount REAL NOT NULL,
+	gateway TEXT NOT NULL,
+	status TEXT NOT NULL DEFAULT 'pending',
+	verified BOOLEAN NOT NULL DEFAULT FALSE,
+	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	verified_at DATETIME,
+
+	FOREIGN KEY(user_id)
+	REFERENCES users(id)
+);
+`
+
+_, err = db.Exec(paymentsTable)
+if err != nil {
+	return nil, err
+}
+
+return db, nil
 }

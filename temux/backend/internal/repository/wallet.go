@@ -107,3 +107,44 @@ func (r *WalletRepository) DeductBalance(
 
 	return err
 }
+func (r *WalletRepository) AddBalanceTx(
+	tx *sql.Tx,
+	userID int,
+	amount float64,
+) error {
+
+	query := `
+	UPDATE wallets
+	SET balance = balance + ?
+	WHERE user_id = ?
+	`
+
+	_, err := tx.Exec(
+		query,
+		amount,
+		userID,
+	)
+
+	return err
+}
+
+func (r *WalletRepository) DeductBalanceTx(
+	tx *sql.Tx,
+	userID int,
+	amount float64,
+) error {
+
+	query := `
+	UPDATE wallets
+	SET balance = balance - ?
+	WHERE user_id = ?
+	`
+
+	_, err := tx.Exec(
+		query,
+		amount,
+		userID,
+	)
+
+	return err
+}

@@ -219,3 +219,52 @@ func (r *TransactionRepository) GetAllTransactions() (
 
 	return transactions, nil
 }
+func (r *TransactionRepository) CreateDeposit(
+	tx *sql.Tx,
+	userID int,
+	amount float64,
+) error {
+
+	query := `
+	INSERT INTO transactions(
+		user_id,
+		type,
+		amount
+	)
+	VALUES(?,?,?)
+	`
+
+	_, err := tx.Exec(
+		query,
+		userID,
+		"deposit",
+		amount,
+	)
+
+	return err
+}
+
+func (r *TransactionRepository) CreateWithdrawal(
+	tx *sql.Tx,
+	userID int,
+	amount float64,
+) error {
+
+	query := `
+	INSERT INTO transactions(
+		user_id,
+		type,
+		amount
+	)
+	VALUES(?,?,?)
+	`
+
+	_, err := tx.Exec(
+		query,
+		userID,
+		"withdraw",
+		amount,
+	)
+
+	return err
+}

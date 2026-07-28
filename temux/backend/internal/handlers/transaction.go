@@ -6,7 +6,7 @@ import (
 	"temux/internal/models"
 	"temux/internal/repository"
 	"temux/internal/utils"
-
+	"temux/internal/services"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,6 +15,7 @@ type TransactionHandler struct {
 	WalletRepo      *repository.WalletRepository
 	ReferralRepo    *repository.ReferralRepository
 	WithdrawalRepo  *repository.WithdrawalRepository
+	WalletService *services.WalletService
 }
 
 func (h *TransactionHandler) Deposit(
@@ -43,26 +44,20 @@ func (h *TransactionHandler) Deposit(
 
 	userID := utils.GetUserID(c)
 
-	tx := &models.Transaction{
-		UserID: userID,
-		Type:   "deposit",
-		Amount: req.Amount,
-	}
+	err := h.WalletService.Deposit(
+	userID,
+	req.Amount,
+)
 
-	err := h.TransactionRepo.CreateTransaction(tx)
-
-	if err != nil {
-		c.JSON(
-			http.StatusInternalServerError,
-			gin.H{"error": err.Error()},
-		)
-		return
-	}
-
-	err = h.WalletRepo.AddBalance(
-		userID,
-		req.Amount,
+if err != nil {
+	c.JSON(
+		http.StatusInternalServerError,
+		gin.H{
+			"error": err.Error(),
+		},
 	)
+	return
+}
 	//-----------------------------------
 	// Referral Commission
 	//-----------------------------------

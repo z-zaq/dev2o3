@@ -62,6 +62,14 @@ func main() {
 	withdrawalRepo := &repository.WithdrawalRepository{
 		DB: db,
 	}
+	paymentHandler := &handlers.PaymentHandler{
+	UserRepo: userRepo,
+}
+walletService := &services.WalletService{
+	DB:              db,
+	WalletRepo:      walletRepo,
+	TransactionRepo: transactionRepo,
+}
 	go func() {
 
 		for {
@@ -94,6 +102,7 @@ func main() {
 		WalletRepo:      walletRepo,
 		ReferralRepo:    referralRepo,
 		WithdrawalRepo:  withdrawalRepo,
+		WalletService:   walletService,
 	}
 	investmentHandler := &handlers.InvestmentHandler{
 		InvestmentRepo:  investmentRepo,
@@ -117,6 +126,7 @@ func main() {
 		ReferralRepo:    referralRepo,
 		WithdrawalRepo:  withdrawalRepo,
 	}
+
 
 	//-----------------------------------
 	// Router
@@ -146,15 +156,6 @@ func main() {
 
 	api.Use(
 		middleware.AuthMiddleware(),
-	)
-
-	api.GET(
-		"/dashboard",
-		func(c *gin.Context) {
-			c.JSON(200, gin.H{
-				"message": "Welcome to Temux",
-			})
-		},
 	)
 
 	api.GET(
@@ -203,6 +204,10 @@ func main() {
 		"/referral-earnings",
 		referralHandler.Earnings,
 	)
+	//-----------------------------------
+	// Admin Routes
+	//-----------------------------------
+
 	admin := api.Group("/admin")
 
 	admin.Use(
@@ -217,10 +222,6 @@ func main() {
 	admin.GET(
 		"/users",
 		adminHandler.Users,
-	)
-	admin.GET(
-		"/dashboard",
-		adminHandler.Dashboard,
 	)
 	admin.GET(
 		"/users/:id",
@@ -243,6 +244,10 @@ func main() {
 		"/withdrawals/:id/reject",
 		adminHandler.RejectWithdrawal,
 	)
+	api.POST(
+	"/payments/deposit",
+	paymentHandler.InitializeDeposit,
+)
 
 	//-----------------------------------
 	// Start Server
