@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"time"
 
 	"temux/internal/config"
 	"temux/internal/database"
@@ -10,7 +9,7 @@ import (
 	"temux/internal/middleware"
 	"temux/internal/repository"
 	"temux/internal/services"
-
+	"temux/internal/scheduler"
 	"github.com/gin-gonic/gin"
 )
 
@@ -70,19 +69,13 @@ walletService := &services.WalletService{
 	WalletRepo:      walletRepo,
 	TransactionRepo: transactionRepo,
 }
-	go func() {
+sch := scheduler.New()
 
-		for {
+sch.Register(&scheduler.ProfitJob{
+	InvestmentRepo: investmentRepo,
+})
 
-			services.ProcessProfits(
-				investmentRepo,
-			)
-
-			time.Sleep(
-				time.Minute,
-			)
-		}
-	}()
+sch.Start()
 
 	//-----------------------------------
 	// Handlers
